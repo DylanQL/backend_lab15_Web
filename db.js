@@ -4,12 +4,13 @@ const { Sequelize } = require('sequelize');
 let sequelize;
 
 try {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
     // Configuración para Vercel - base de datos en memoria
     sequelize = new Sequelize({
       dialect: 'sqlite',
       storage: ':memory:', 
       logging: false,
+      dialectModule: require('better-sqlite3'),
       define: {
         timestamps: false // Desactivar timestamps automáticos para simplificar
       }
