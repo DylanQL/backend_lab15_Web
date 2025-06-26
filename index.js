@@ -19,19 +19,34 @@ app.use(cors());
 // Middleware para poder recibir y procesar datos en formato JSON en las solicitudes
 app.use(express.json());
 
+// Ruta de prueba para verificar que el servidor funciona
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend funcionando correctamente' });
+});
+
 // Asigna el enrutador de productos bajo la ruta base /api/productos
 app.use('/api/productos', productosRoutes);
 
-// Sincroniza los modelos Sequelize con la base de datos (crea las tablas si no existen)
-sequelize.sync()
-  .then(() => {
-    // Si la sincronización es exitosa, inicia el servidor en el puerto 3001
+// Función para inicializar la base de datos
+async function initDatabase() {
+  try {
+    await sequelize.sync();
     console.log('Base de datos sincronizada');
-    app.listen(3001, () => {
-      console.log('Backend corriendo en http://localhost:3001');
-    });
-  })
-  .catch(err => {
-    // Si ocurre un error al sincronizar con la base de datos, se muestra en consola
+  } catch (err) {
     console.error('Error al sincronizar base de datos:', err);
+  }
+}
+
+// Inicializar la base de datos
+initDatabase();
+
+// Para desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Backend corriendo en http://localhost:${PORT}`);
   });
+}
+
+// Exportar la app para Vercel
+module.exports = app;
