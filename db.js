@@ -1,15 +1,30 @@
 const { Sequelize } = require('sequelize');
 
 // Configuración para producción (Vercel) vs desarrollo
-const sequelize = process.env.NODE_ENV === 'production' 
-  ? new Sequelize({
+let sequelize;
+
+try {
+  if (process.env.NODE_ENV === 'production') {
+    // Configuración para Vercel - base de datos en memoria
+    sequelize = new Sequelize({
       dialect: 'sqlite',
-      storage: ':memory:', // Base de datos en memoria para Vercel
-      logging: false
-    })
-  : new Sequelize({
-      dialect: 'sqlite',
-      storage: './database.sqlite'
+      storage: ':memory:', 
+      logging: false,
+      define: {
+        timestamps: false // Desactivar timestamps automáticos para simplificar
+      }
     });
+  } else {
+    // Configuración para desarrollo local
+    sequelize = new Sequelize({
+      dialect: 'sqlite',
+      storage: './database.sqlite',
+      logging: console.log
+    });
+  }
+} catch (error) {
+  console.error('Error al configurar Sequelize:', error);
+  throw error;
+}
 
 module.exports = sequelize;
